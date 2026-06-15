@@ -147,7 +147,6 @@ def compute_footprint(G,k=1):
         for i in range(n):
             if j >= f[i] and (j <= l[i] or i < k):
                 active += 1
-        if max_active > active: 
-            max_active = active
-            print(j)
+            if active > max_active:
+                max_active = active
     return max_active

@@ -161,10 +161,10 @@ class TrioOrthogonalSAT:
         n = self.n
         # max amount of gates is 2^(n-1)
         max_gate = (1<<(n-1)) if self.max_gate==0 else self.max_gate
-        # 49 gate is required for d>3
+        # 37 gate is required for d>3
         if self.min_dist > 3:
-            assert max_gate > 48, "No code with distance >3 exist with less than 49 gates"
-            model.Add(sum(v) > 48)
+            assert max_gate > 37, "No code with distance >3 exist with less than 37 gates"
+            model.Add(sum(v) > 37)
         if self.exact_gate > 0:
             model.Add(sum(v) == self.exact_gate)
         else:
