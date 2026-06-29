@@ -145,7 +145,7 @@ def bruteforce_distance(G,d):
                 return False
     return True
 
-cczsat = TrioOrthogonalSATCCZ(4,min_dist=2)
+cczsat = TrioOrthogonalSATCCZ(2,min_dist=2)
 solver = cp_model.CpSolver()
 st = solver.solve(cczsat.model)
 print(st)
