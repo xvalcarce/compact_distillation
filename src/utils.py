@@ -1,9 +1,9 @@
 import numpy as np
 from sympy import Symbol, series
 
-def mappingLitinski(p):
+def mapping_distillation(p):
     """
-    Map the rotation representation to Litinksi's (not as costly).
+    Map matrix `p` from logical T on the repetition code to distillation circuits.
     """
     r = np.zeros_like(p)
     r[0] = p[0]
@@ -11,15 +11,15 @@ def mappingLitinski(p):
         r[k] = p[k] ^ p[k-1]
     return r
 
-def mappingrep(p):
+def mapping_rep(p):
     """
-    Map the lintinski repr to the repetition code one
+    Map matrix `p` from distillation circuits back to the logical-T on the repetition code.
     """
     return np.bitwise_xor.accumulate(p, axis=0)
 
 def is_triorthogonal(G):
     """
-    Whether a matrix is triorthogonal (Litinksi mapping required).
+    Whether a distillation matrix is triorthogonal.
     """
     n,_ = G.shape
     for i in range(n):
@@ -35,7 +35,7 @@ def is_triorthogonal(G):
 
 def is_triorthogonal_rep(G):
     """
-    Whether a matrix is triorthogonal for the reptition code.
+    Whether a matrix is triorthogonal (reptition code representation).
     """
     n,_ = G.shape
     for i in range(n):
@@ -52,9 +52,9 @@ def is_triorthogonal_rep(G):
                     return False
     return True
 
-def is_CCZ_repr(G):
+def is_CCZ_rep(G):
     """
-    Whether a matrix is triorthogonal for the reptition code.
+    Whether a matrix implements CCZ on the reptition code.
     """
     n,_ = G.shape
     for i in range(n):
@@ -75,8 +75,11 @@ def is_CCZ_repr(G):
                         print(i,j,k)
                         return False
     return True
- 
 
+
+#------
+# Compute the distance and prefactor using MacWilliams inequality (to be used in the repetition code format)
+#------
 
 def sol_to_mat(v,Sn):
     """makes the rm matrix from the cp-sat solution"""
@@ -88,9 +91,10 @@ def coeff_dev(M):
     at the numerator (cc0 return) and denominator (cc1 return)
    
     """ 
+    assert is_triorthogonal_rep(M), "Matrix should be in the logical-T on the repetition code format"
     N = M.transpose()
     n, _ = M.shape
-    
+
     # Gram-Schmidt-like reduction on binary field
     N2 = np.zeros_like(N)
     N2[:, 0] = N[:, 0]
@@ -126,27 +130,5 @@ def Partial_exp(c,dist) : #gives the Taylor serie of (20) at the distance of int
     f = 1-(sum(cc1[k][1]*(1-2*X)**cc1[k][0] for k in range(len(cc1)))/sum(cc0[k][1]*(1-2*X)**cc0[k][0] for k in range(len(cc0))))/2
     return series(f,n=dist+1)
 
-def compute_footprint(G,k=1):
-    """
-    Compute footprint of binary matrix G, with k output rows.
-    """
-    n, m = G.shape
-    f = []
-    l = []
-    for i in range(n):
-        ones = [j for j in range(m) if G[i, j] == 1]
-        if not ones:
-            f.append(m)
-            l.append(-1)
-        else:
-            f.append(min(ones))
-            l.append(max(ones))
-    max_active = 0
-    for j in range(m):
-        active = 0
-        for i in range(n):
-            if j >= f[i] and (j <= l[i] or i < k):
-                active += 1
-            if active > max_active:
-                max_active = active
-    return max_active
+def output_error(G,max_d=7):
+    return Partial_exp(coeff_dev(G),max_d)
